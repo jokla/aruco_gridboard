@@ -22,4 +22,6 @@ Now you can clone aruco_gridboard in your `catkin_ws` and build with catkin_make
 
 ## How to use
 
+`export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/jokla/Software/opencv-3.2.0/build/lib/`   
+
 `roslaunch aruco_gridboard detection.launch`
