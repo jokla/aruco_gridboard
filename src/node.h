@@ -35,7 +35,6 @@ namespace aruco_gridboard{
 
 
                 cv_bridge::CvImagePtr cv_ptr;
-                cv::Mat cvI_;
                 std_msgs::Header image_header_;
                 bool got_image_;
                 unsigned int lastHeaderSeq_;
@@ -43,7 +42,7 @@ namespace aruco_gridboard{
 
             void waitForImage();
             void frameCallback(const sensor_msgs::ImageConstPtr& image, const sensor_msgs::CameraInfoConstPtr& cam_info);
-            const void manageInputKey(const std::string s);
+            void publishPose();
 
         public:
                 Node();

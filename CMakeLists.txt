@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(aruco_gridboard)
 
+find_package( OpenCV REQUIRED )
+
 
 find_package(catkin REQUIRED COMPONENTS
   cv_bridge
@@ -48,7 +50,14 @@ add_executable(aruco_gridboard
 target_link_libraries(aruco_gridboard
     ${resource_retriever_LIBRARIES}
     ${catkin_LIBRARIES}
-    ${Boost_LIBRARIES})
+    ${Boost_LIBRARIES}
+    )
 
 
+add_executable(create_board
+   src/create_board.cpp
+  )
+target_link_libraries(create_board
+    ${OpenCV_LIBS}
+    )
 
