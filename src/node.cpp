@@ -48,6 +48,7 @@ void Node::waitForImage(){
     }
 }
 
+//Read parameters from a file
 static bool readDetectorParameters(std::string filename, cv::Ptr<cv::aruco::DetectorParameters> &params) {
     cv::FileStorage fs(filename, cv::FileStorage::READ);
     if(!fs.isOpened())
@@ -98,25 +99,6 @@ void Node::frameCallback(const sensor_msgs::ImageConstPtr& image, const sensor_m
     got_image_ = true;
 }
 
-//void getEulerAngles(cv::Mat &rotCamerMatrix, cv::Vec3d &eulerAngles){
-
-//  cv::Mat cameraMatrix,rotMatrix,transVect,rotMatrixX,rotMatrixY,rotMatrixZ;
-//  double* _r = rotCamerMatrix.ptr<double>();
-//  double projMatrix[12] = {_r[0],_r[1],_r[2],0,
-//                           _r[3],_r[4],_r[5],0,
-//                           _r[6],_r[7],_r[8],0};
-
-//  cv::decomposeProjectionMatrix( cv::Mat(3,4,CV_64FC1,projMatrix),
-//                                 cameraMatrix,
-//                                 rotMatrix,
-//                                 transVect,
-//                                 rotMatrixX,
-//                                 rotMatrixY,
-//                                 rotMatrixZ,
-//                                 eulerAngles);
-//}
-
-
 // Checks if a matrix is a valid rotation matrix.
 bool isRotationMatrix(cv::Mat &R)
 {
@@ -126,7 +108,6 @@ bool isRotationMatrix(cv::Mat &R)
     cv::Mat I = cv::Mat::eye(3,3, shouldBeIdentity.type());
 
     return  norm(I, shouldBeIdentity) < 1e-6;
-
 }
 
 // Calculates rotation matrix to euler angles
@@ -207,59 +188,28 @@ void Node::spin(){
 
     fs.release();
 
-    // Fill
-    //std::vector< std::vector< cv::Point3f > > objPoints_;
-    //    board_ = new cv::aruco::Board;
+    // Create a board
     cv::Ptr<cv::aruco::Dictionary> dictionary = cv::aruco::getPredefinedDictionary(cv::aruco::PREDEFINED_DICTIONARY_NAME(1));
-
-    //    board_->objPoints = objPoints_;
-    //    board_->dictionary = dictionary;
-    //    board_->ids = ids_;
-
-
-    // create board object
-    cv::Ptr<cv::aruco::GridBoard> gridboard =
-            cv::aruco::GridBoard::create(1, 1, 0.17, 0.2, dictionary);
-    cv::Ptr<cv::aruco::Board> board = gridboard.staticCast<cv::aruco::Board>();
-
-    //    cv::Ptr<cv::aruco::Board> board;
-    //    board->create(objPoints_, dictionary, ids_);
-
-    std::vector< std::vector<cv::Point3f> > objPoints_file = objPoints_;
+    cv::Ptr<cv::aruco::Board> board = cv::aruco::Board::create(objPoints_,dictionary,ids_);
 
     //objPoints_[0] = objPoints_[8];
     //ids_[0] = ids_[8];
     //objPoints_.resize(1);
-    // ids_.resize(1);
+    //ids_.resize(1);
 
+    cv::Vec3d rvec, tvec;
 
-    for (unsigned int i = 0; i< objPoints_.size(); i++)
+    for (unsigned int i = 0; i < objPoints_.size(); i++)
     {
         for (unsigned int j = 0; j< objPoints_[i].size(); j++)
             std::cout<< objPoints_[i][j] << " ";
         std::cout << std::endl;
     }
 
-    for (unsigned int i = 0; i< objPoints_.size(); i++)
+    for (unsigned int i = 0; i < ids_.size(); i++)
     {
         std::cout<< ids_[i] << std::endl;
     }
-
-    board->objPoints = objPoints_;
-    board->dictionary = dictionary;
-    board->ids = ids_;
-
-
-    // CUSTOM
-    //  int markersX = 3;
-    //  int markersY = 3;
-    //  float markerLength = 200;
-    //  float markerSeparation = 50;
-
-    //     // create board object
-    //     cv::Ptr<cv::aruco::GridBoard> gridboard =
-    //         cv::aruco::GridBoard::create(markersX, markersY, markerLength, markerSeparation, dictionary);
-    //     cv::Ptr<cv::aruco::Board> board = gridboard.staticCast<cv::aruco::Board>();
 
     while(ros::ok()){
 
@@ -287,37 +237,13 @@ void Node::spin(){
             std::vector< int > ids;
             std::vector< std::vector< cv::Point2f > > corners, rejected;
 
-            cv::Ptr<cv::aruco::Dictionary> dictionary  = cv::aruco::getPredefinedDictionary(cv::aruco::PREDEFINED_DICTIONARY_NAME(0));
-            cv::aruco::detectMarkers(imageCopy, dictionary, corners, ids, detectorParams, rejected);
+            //cv::Ptr<cv::aruco::Dictionary> dictionary  = cv::aruco::getPredefinedDictionary(cv::aruco::PREDEFINED_DICTIONARY_NAME(0));
+            cv::aruco::detectMarkers(imageCopy, board->dictionary, corners, ids, detectorParams, rejected);
             std::cout << "Found  " << corners.size() << " markers." << std::endl;
             //std::cout << "Found  " << rejected.size() << " rejected." << std::endl;
 
-            // Estimate the pose of each single markers (DEBUG)
-            std::vector< cv::Vec3d > rvecs, tvecs;
-            if(ids.size() > 0)
-            {
-                cv::aruco::estimatePoseSingleMarkers(corners, 0.17, camMatrix_, distCoeffs_, rvecs, tvecs);
-                //std::cout << "r1:" <<rvecs[0] << std::endl;
-                //std::cout << "t1:" <<tvecs[0] << std::endl;
-                for(unsigned int i = 0; i < ids.size(); i++)
-                    cv::aruco::drawAxis(imageCopy, camMatrix_, distCoeffs_, rvecs[i], tvecs[i], 0.17f * 0.5f);
-            }
-
-            //      cv::Vec3d rvecs_c, tvecs_c;
-
-            //      for (unsigned int i = 0; i<tvecs.size(); i++)
-            //      {
-            //        tvecs_c += tvecs[i];
-            //      }
-            //      for (unsigned int i = 0; i<tvecs.size(); i++)
-            //      {
-            //        tvecs_c[i] = tvecs_c[i] / tvecs.size();
-            //      }
-
-            //      cv::aruco::drawAxis(imageCopy, camMatrix_, distCoeffs_, rvecs[0], tvecs_c, 0.50f * 0.5f);
 
             // Now estimate the pose of the board
-            cv::Vec3d rvec, tvec;
             int markersOfBoardDetected = 0;
 
             if(ids.size() > 0)
@@ -328,12 +254,21 @@ void Node::spin(){
             std::cout << "objPoints:" <<corners.size() <<" " <<   board->objPoints.size()<< std::endl;
             //std::cout << "objPoints:" <<corners[0][0] <<" " <<   board->objPoints[0][0]<< std::endl;
 
-            if(markersOfBoardDetected > 0)
+            if(markersOfBoardDetected )
             {
-                status_tracker_ = 1;
                 std::cout << "r:" <<rvec << std::endl;
                 std::cout << "t:" <<tvec << std::endl;
-                cv::aruco::drawAxis(imageCopy, camMatrix_, distCoeffs_, rvec, tvec, 0.4);
+
+                if (cv::norm(tvec) > 0.00001)
+                {
+                    cv::aruco::drawAxis(imageCopy, camMatrix_, distCoeffs_, rvec, tvec, 0.4);
+                    status_tracker_ = 1;
+                }
+                else
+                {
+                    std::cout << "Cannot estimate the pose" << std::endl;
+                    status_tracker_ = 0;
+                }
             }
             else
                 status_tracker_ = 0;
@@ -343,18 +278,6 @@ void Node::spin(){
             // Draw markers on the image
             if (ids.size() > 0)
                 cv::aruco::drawDetectedMarkers(imageCopy, corners, ids);
-
-            // DEBUG: Reproject points in the images
-            //      std::vector<cv::Point2f> imagePoints;
-            //      cv::projectPoints(objPoints_file[2], rvec, tvec, camMatrix_, distCoeffs_, imagePoints);
-            //      //for (unsigned int i = 0; i < imagePoints.size(); ++i)
-            //      //  {
-            //      cv::circle(imageCopy,imagePoints[0],4,cv::Scalar(100, 0, 255),2,8,0);
-            //      cv::circle(imageCopy,imagePoints[1],4,cv::Scalar(255, 0, 0),2,8,0);
-            //      cv::circle(imageCopy,imagePoints[2],4,cv::Scalar(0, 0, 255),2,8,0);
-            //      cv::circle(imageCopy,imagePoints[3],4,cv::Scalar(0, 255, 0),2,8,0);
-            //      // }
-
 
             if (status_tracker_) {
                 // Publish pose
@@ -368,8 +291,6 @@ void Node::spin(){
                 cv::Mat rot_mat(3, 3, cv::DataType<float>::type);
                 cv::Rodrigues(rvec, rot_mat);
                 cv::Vec3d eulerAngles = rotationMatrixToEulerAngles(rot_mat);
-
-                //std::cout << eulerAngles[2] << " " <<  eulerAngles[0] << " " << eulerAngles[1] << std::endl;
 
                 geometry_msgs::Quaternion p_quat = tf::createQuaternionMsgFromRollPitchYaw(eulerAngles[0], eulerAngles[1], eulerAngles[2]);
                 msg_pose.pose.orientation = p_quat;

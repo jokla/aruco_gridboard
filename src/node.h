@@ -1,5 +1,5 @@
-#ifndef __VP_BLOBS_TRACKER_NODE_H__
-#define __VP_BLOBS_TRACKER_NODE_H__
+#ifndef __ARUCO_GRIDBOARD_NODE_H__
+#define __ARUCO_GRIDBOARD_NODE_H__
 
 #include <sstream>
 #include <string>
