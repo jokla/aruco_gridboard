@@ -1,18 +1,5 @@
-<!-- -*- xml -*-
-
-     This tutorial relies on a live video sequence acquired with an 
-     usb camera in front of a QR code planar target. The model 
-     corresponding to this target is given into the models directory 
-     of this package.
-
-     Camera parameters are set as rosparam parameters. They need to be changed
-     to be the one of your camera.
-
-     See http://www.ros.org/wiki/visp_blobs_tracker for more information.
-
-  -->
 <launch>  
-  <!-- Launch the tracking node -->
+  <!-- Launch the detection node -->
   <node pkg="aruco_gridboard" type="aruco_gridboard" name="aruco_gridboard" output="screen" >
     <param name="board_path" value="$(find aruco_gridboard)/data/layout.yaml" />
     <param name="detector_param_path" value="$(find aruco_gridboard)/data/detector_params.yml" />
