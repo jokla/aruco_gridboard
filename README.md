@@ -39,9 +39,9 @@ $ source devel/setup.bash
 ```
 
 ## How to use it
-Add the new OpenCV to the path:
+Add the new OpenCV to the path:   
 `$ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/jokla/Software/opencv-3.2.0/build/lib/`   
-Launch the detection node:
+Launch the detection node:   
 `roslaunch aruco_gridboard detection.launch`
 
 [Here](https://github.com/jokla/aruco_gridboard/blob/master/launch/detection.launch) you can see an example of the launch file:
