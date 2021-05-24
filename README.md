@@ -62,7 +62,7 @@ Launch the detection node:
 
 
 ```
-The node is subscribing to the image topic `/camera/image` and the topic `/camera/camera_info` containing the camera parameters. Aruco will try to detect the board described by the yaml file (you can set in with the parameter `board_path` and it will publish the board pose on the topic `/vision/pose` and the detection status on the topic `/vision/status`. 
+The node is subscribing to the image topic `/camera/image` and the topic `/camera/camera_info` containing the camera parameters. Aruco will try to detect the board described by the yaml file (you can set in with the parameter `board_path` and it will publish the board pose on the topic `/vision/pose` and the detection status on the topic `/vision/status`). 
 
 
 
